@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Safwan Royale Hotel & Resort — Reservation & Management System</title>
+<meta name="description" content="Safwan Royale Hotel & Resort, Lahore — full reservation and front-desk management system.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,300;0,9..144,500;0,9..144,600;0,9..144,700;1,9..144,500&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" integrity="sha512-DTOQO9RWCH3ppGqcWaEA1BIZOC6xxalwEsw9c2QQeAIftl+Vegovlnee1c9QX4TctnWMn13TZye+giMm8e2LwA==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+<link rel="stylesheet" href="styles.css">
+</head>
+<body>
+
+<div id="route-loader"></div>
+<div id="toast-stack" aria-live="polite"></div>
+<div id="modal-root"></div>
+
+<header>
+  <nav class="wrap">
+    <button class="brandmark" id="brandHome" aria-label="Go to home"><span class="tag">SR</span> Safwan Royale Hotel &amp; Resort</button>
+    <div class="navlinks" id="navLinks">
+      <a data-route="home" data-route-name="home">Home</a>
+      <a data-route="dashboard" data-route-name="dashboard">Dashboard</a>
+      <a data-route="reserve" data-route-name="reserve">Reserve</a>
+      <a data-route="reservations" data-route-name="reservations">Reservations</a>
+      <a data-route="availability" data-route-name="availability">Availability</a>
+      <a data-route="rooms" data-route-name="rooms">Rooms</a>
+      <a data-route="guests" data-route-name="guests">Guests</a>
+      <a data-route="reports" data-route-name="reports">Reports</a>
+      <a data-route="feedback" data-route-name="feedback">Feedback</a>
+      <a data-route="contact" data-route-name="contact">Contact</a>
+    </div>
+    <div class="nav-cta">
+      <button class="btn btn-primary btn-sm" data-route="reserve"><i class="fa-solid fa-bed"></i> Reserve</button>
+      <button class="nav-toggle" id="navToggle" aria-label="Toggle menu"><i class="fa-solid fa-bars"></i></button>
+    </div>
+  </nav>
+  <div class="wrap">
+    <div class="mobile-menu" id="mobileMenu">
+      <a data-route="home">Home</a>
+      <a data-route="dashboard">Dashboard</a>
+      <a data-route="reserve">Reserve Room</a>
+      <a data-route="reservations">Reservations</a>
+      <a data-route="modify">Modify Reservation</a>
+      <a data-route="cancel">Cancel Reservation</a>
+      <a data-route="checkin">Check-In</a>
+      <a data-route="checkout">Check-Out</a>
+      <a data-route="availability">Room Availability</a>
+      <a data-route="guests">Guests</a>
+      <a data-route="rooms">Rooms</a>
+      <a data-route="reports">Reports</a>
+      <a data-route="feedback">Feedback</a>
+      <a data-route="about">About System</a>
+      <a data-route="contact">Contact</a>
+    </div>
+  </div>
+</header>
+
+<main id="view"></main>
+
+<footer id="contact-footer">
+  <div class="wrap">
+    <div class="footer-grid">
+      <div>
+        <div class="brandmark" style="margin-bottom:14px;"><span class="tag">SR</span> Safwan Royale</div>
+        <p style="color:var(--parchment-dim); font-size:13.5px; line-height:1.7; max-width:34ch;">Luxury hospitality in the heart of Lahore — 50 rooms, five floors, one seamless reservation system.</p>
+        <div class="social-row">
+          <a href="https://www.facebook.com/share/18us2fTAB4/" target="_blank" rel="noopener noreferrer" data-tip="Facebook" aria-label="Facebook"><i class="fa-brands fa-facebook-f"></i></a>
+          <a href="https://www.instagram.com/safwanshafiq9?igsh=bWNnNWF5cWFiM3Fo" target="_blank" rel="noopener noreferrer" data-tip="Instagram" aria-label="Instagram"><i class="fa-brands fa-instagram"></i></a>
+          <a href="https://wa.me/923207165167?text=Hello%20Sir%2C%20How%20can%20I%20help%20you%3F" target="_blank" rel="noopener noreferrer" data-tip="WhatsApp" aria-label="WhatsApp"><i class="fa-brands fa-whatsapp"></i></a>
+          <a href="https://www.linkedin.com/in/safwan-shafiq-90b70238b" target="_blank" rel="noopener noreferrer" data-tip="LinkedIn" aria-label="LinkedIn"><i class="fa-brands fa-linkedin-in"></i></a>
+        </div>
+      </div>
+      <div>
+        <h5>Quick links</h5>
+        <ul class="footer-links">
+          <li><a data-route="dashboard">Dashboard</a></li>
+          <li><a data-route="reserve">Reserve a room</a></li>
+          <li><a data-route="reservations">Reservations</a></li>
+          <li><a data-route="availability">Room availability</a></li>
+          <li><a data-route="reports">Reports</a></li>
+        </ul>
+      </div>
+      <div>
+        <h5>System</h5>
+        <ul class="footer-links">
+          <li><a data-route="guests">Guests</a></li>
+          <li><a data-route="rooms">Rooms</a></li>
+          <li><a data-route="feedback">Feedback</a></li>
+          <li><a data-route="about">About system</a></li>
+          <li><a data-route="contact">Contact</a></li>
+        </ul>
+      </div>
+      <div>
+        <h5>Stay in touch</h5>
+        <p style="color:var(--parchment-dim); font-size:13px; line-height:1.8; margin:0 0 6px;">
+          Main Boulevard, Gulberg III, Lahore, Pakistan<br>
+          +92 320 7165167 &nbsp;·&nbsp; safwanshafiq123@gmail.com
+        </p>
+        <form class="newsletter-form" id="newsletterForm">
+          <input type="email" id="newsletterEmail" placeholder="Your email">
+          <button class="btn btn-primary btn-sm" type="submit">Subscribe</button>
+        </form>
+      </div>
+    </div>
+    <div class="footer-bottom">
+      <p>© 2026 Safwan Royale Hotel &amp; Resort, Lahore. All rights reserved.</p>
+      <p>Muhammad Safwan Shafique — Proprietor</p>
+    </div>
+  </div>
+</footer>
+
+<button id="back-to-top" aria-label="Back to top"><i class="fa-solid fa-arrow-up"></i></button>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js" integrity="sha512-6HrPqAvK+lZElYZ87fftAgOV+2LC1CtBSjjW2TB4GkJTZoP6WMK4+qErorf1a+jkQK4jFC7bBcyGuqUp1i5J/g==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+<script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js"></script>
+<script src="app.js"></script>
+</body>
+</html>
