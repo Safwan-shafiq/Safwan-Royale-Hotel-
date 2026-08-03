@@ -65,43 +65,27 @@ function saveData(){
   }).catch(() => {});
 }
 
-// Load from Google Sheets first, fallback to localStorage
+// Load from localStorage instantly, sync from Google Sheets in background
 function loadData(){
-  // Show loading screen while fetching
-  showAppLoader(true);
+  // Step 1 — load from localStorage instantly (no delay)
+  loadFromLocal();
+
+  // Step 2 — sync from Google Sheets in background silently
   fetch(GS_URL + '?t=' + Date.now())
     .then(r => r.json())
     .then(data => {
       if(data && data.rooms && data.rooms.length > 0){
-        // Got fresh data from Google Sheets
         const local = getLocalData();
-        DB = {
-          rooms: data.rooms.map(normalizeRoom),
-          reservations: data.reservations.map(normalizeReservation),
-          feedback: data.feedback || [],
-          activity: local ? (local.activity || []) : [],
-          subscribers: local ? (local.subscribers || []) : [],
-          contactMessages: local ? (local.contactMessages || []) : [],
-          seq: Number(data.seq) || 1000
-        };
-        // Ensure activity log exists
-        if(!DB.activity.length){
-          DB.activity = [{ id: fid(), icon:"fa-solid fa-circle-info", text:"System initialized — 50 rooms across 5 floors ready.", time: Date.now() - 1000*60*60*3 }];
-        }
+        DB.rooms = data.rooms.map(normalizeRoom);
+        DB.reservations = data.reservations.map(normalizeReservation);
+        DB.feedback = data.feedback || DB.feedback || [];
+        DB.seq = Math.max(Number(data.seq) || 1000, DB.seq);
         try{ localStorage.setItem(STORE_KEY, JSON.stringify(DB)); }catch(e){}
-      } else {
-        // Sheet empty or error — use localStorage or seed
-        loadFromLocal();
+        // Silently re-render current page with fresh data
+        renderRoute();
       }
     })
-    .catch(() => {
-      // Network error — use localStorage
-      loadFromLocal();
-    })
-    .finally(() => {
-      showAppLoader(false);
-      renderRoute();
-    });
+    .catch(() => {}); // silently ignore network errors
 }
 
 function getLocalData(){
@@ -143,33 +127,8 @@ function normalizeReservation(r){
   };
 }
 
-// Loading overlay
-function showAppLoader(show){
-  let loader = document.getElementById('app-loader');
-  if(show){
-    if(!loader){
-      loader = document.createElement('div');
-      loader.id = 'app-loader';
-      loader.innerHTML = `
-        <div style="text-align:center;">
-          <div style="width:48px;height:48px;border:3px solid rgba(201,162,75,0.2);border-top-color:var(--brass);border-radius:50%;animation:spin .8s linear infinite;margin:0 auto 20px;"></div>
-          <div style="font-family:'JetBrains Mono',monospace;font-size:13px;color:var(--brass-light);letter-spacing:0.1em;">LOADING DATA…</div>
-          <div style="font-size:12px;color:var(--parchment-dim);margin-top:8px;">Syncing with server</div>
-        </div>`;
-      loader.style.cssText = 'position:fixed;inset:0;background:var(--ink);z-index:9999;display:flex;align-items:center;justify-content:center;';
-      document.body.appendChild(loader);
-      // Add spin animation
-      if(!document.getElementById('spin-style')){
-        const s = document.createElement('style');
-        s.id = 'spin-style';
-        s.textContent = '@keyframes spin{to{transform:rotate(360deg)}}';
-        document.head.appendChild(s);
-      }
-    }
-  } else {
-    if(loader) loader.remove();
-  }
-}
+// Loading overlay — kept for potential future use
+function showAppLoader(show){}
 function fid(){ return 'id' + Math.random().toString(36).slice(2,10); }
 function nextRes(){ DB.seq += 1; return 'RES-' + DB.seq; }
 function daysAgo(n){ return Date.now() - n*24*60*60*1000; }
@@ -1764,9 +1723,8 @@ function initShell(){
   });
 
   window.addEventListener('hashchange', renderRoute);
-  // renderRoute is now called by loadData() after sheets sync
+  renderRoute();
 }
-
 loadData();
 document.addEventListener('DOMContentLoaded', initShell);
 
