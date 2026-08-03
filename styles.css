@@ -613,6 +613,73 @@ footer{padding:60px 0 0; border-top:1px solid var(--line); margin-top:40px;}
   .room-grid{grid-template-columns:repeat(2,1fr);}
 }
 
+/* ================= NAVBAR MOBILE FIX ================= */
+@media (max-width:480px){
+  nav.wrap{height:60px; padding:0 14px;}
+  .brandmark{font-size:12px; gap:8px;}
+  .brandmark .tag{width:28px; height:28px; font-size:11px;}
+  .nav-cta{gap:6px;}
+  .nav-cta .btn-primary{padding:7px 10px; font-size:12px; gap:5px;}
+  .nav-toggle{width:34px; height:34px; font-size:16px;}
+}
+
+/* ================= MODAL MOBILE — Bottom sheet, no scroll ================= */
+@media (max-width:600px){
+  #modal-root{padding:0; align-items:flex-end;}
+  .modal-box{
+    max-width:100%;
+    width:100%;
+    border-radius:20px 20px 0 0;
+    max-height:85vh;
+    overflow-y:auto;
+    margin:0;
+    display:flex;
+    flex-direction:column;
+  }
+  .modal-head{
+    padding:14px 16px;
+    flex-shrink:0;
+    position:sticky;
+    top:0;
+    z-index:2;
+  }
+  .modal-head h3{font-size:16px;}
+  .modal-body{
+    padding:14px 16px;
+    flex:1;
+    overflow-y:auto;
+  }
+  .modal-body .price-row{
+    font-size:13px;
+    padding:7px 0;
+    flex-wrap:wrap;
+    gap:4px;
+  }
+  .modal-body .price-row span:last-child{
+    font-size:12px;
+    text-align:right;
+    word-break:break-word;
+  }
+  .modal-body .price-row.total{font-size:15px;}
+  .modal-foot{
+    padding:10px 16px 20px;
+    flex-shrink:0;
+    flex-wrap:wrap;
+    gap:8px;
+    justify-content:stretch;
+  }
+  .modal-foot .btn{
+    flex:1;
+    justify-content:center;
+    min-width:70px;
+    padding:9px 10px;
+    font-size:12.5px;
+  }
+  /* Activity list in modal */
+  .modal-body .activity-list li{font-size:12.5px; gap:8px; padding:9px 0;}
+  .modal-body .activity-list .a-icon{width:24px; height:24px; font-size:11px;}
+}
+
 /* ================= MOBILE RESPONSIVE FIXES ================= */
 
 /* Tables — horizontal scroll on small screens */
