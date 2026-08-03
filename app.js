@@ -2,7 +2,6 @@
    SAFWAN ROYALE — HOTEL RESERVATION & MANAGEMENT SYSTEM
    Application logic — data layer, router, pages
    ============================================================ */
-(function(){
 "use strict";
 
 /* ===================== CONSTANTS ===================== */
@@ -44,48 +43,74 @@ function seedData(){
 
 const STORE_KEY = "srh_data_v1";
 
-/* ===================== GOOGLE SHEETS DATABASE ===================== */
-const GS_URL = 'https://script.google.com/macros/s/AKfycbx8OMQ0gPkEBPQUyw-MO3nJeJbRGcb4tiyf0ZKYzPeCeCjLOVXBtp8KGbEhaT3kBz6T/exec';
+/* ===================== FIREBASE DATABASE ===================== */
+import { initializeApp } from 'https://www.gstatic.com/firebasejs/12.17.0/firebase-app.js';
+import { getFirestore, doc, setDoc, getDoc, onSnapshot } from 'https://www.gstatic.com/firebasejs/12.17.0/firebase-firestore.js';
 
-// Save to both localStorage (instant) and Google Sheets (sync)
+const firebaseConfig = {
+  apiKey: "AIzaSyAvDEngpUX1qCu4wxClBr_1U4-JMi4sk8",
+  authDomain: "safwan-royale.firebaseapp.com",
+  projectId: "safwan-royale",
+  storageBucket: "safwan-royale.firebasestorage.app",
+  messagingSenderId: "413437129357",
+  appId: "1:413437129357:web:5129aba573eaf3a6e9e8c4"
+};
+
+const fireApp = initializeApp(firebaseConfig);
+const db = getFirestore(fireApp);
+const DB_DOC = doc(db, 'hotel', 'main');
+
+let _unsubscribe = null;
+
+// Save to Firestore + localStorage
 function saveData(){
   try{ localStorage.setItem(STORE_KEY, JSON.stringify(DB)); }catch(e){}
-  // Sync to Google Sheets in background
-  fetch(GS_URL, {
-    method: 'POST',
-    mode: 'no-cors',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({
-      action: 'saveAll',
-      rooms: DB.rooms,
-      reservations: DB.reservations,
-      feedback: DB.feedback,
-      seq: DB.seq
-    })
-  }).catch(() => {});
+  const payload = {
+    rooms: DB.rooms,
+    reservations: DB.reservations,
+    feedback: DB.feedback,
+    seq: DB.seq
+  };
+  setDoc(DB_DOC, payload).catch(err => console.warn('Firebase save error:', err));
 }
 
-// Load from localStorage instantly, sync from Google Sheets in background
+// Load — show loader, fetch from Firestore, then render
 function loadData(){
-  // Step 1 — load from localStorage instantly (no delay)
-  loadFromLocal();
+  showAppLoader(true);
 
-  // Step 2 — sync from Google Sheets in background silently
-  fetch(GS_URL + '?t=' + Date.now())
-    .then(r => r.json())
-    .then(data => {
-      if(data && data.rooms && data.rooms.length > 0){
-        const local = getLocalData();
-        DB.rooms = data.rooms.map(normalizeRoom);
-        DB.reservations = data.reservations.map(normalizeReservation);
-        DB.feedback = data.feedback || DB.feedback || [];
-        DB.seq = Math.max(Number(data.seq) || 1000, DB.seq);
-        try{ localStorage.setItem(STORE_KEY, JSON.stringify(DB)); }catch(e){}
-        // Silently re-render current page with fresh data
-        renderRoute();
-      }
-    })
-    .catch(() => {}); // silently ignore network errors
+  // Subscribe to real-time updates
+  _unsubscribe = onSnapshot(DB_DOC, (snap) => {
+    const data = snap.data();
+    if(data && data.rooms && data.rooms.length > 0){
+      const local = getLocalData();
+      DB = {
+        rooms: data.rooms.map(normalizeRoom),
+        reservations: (data.reservations || []).map(normalizeReservation),
+        feedback: data.feedback || [],
+        activity: local ? (local.activity || defaultActivity()) : defaultActivity(),
+        subscribers: local ? (local.subscribers || []) : [],
+        contactMessages: local ? (local.contactMessages || []) : [],
+        seq: Number(data.seq) || 1000
+      };
+      try{ localStorage.setItem(STORE_KEY, JSON.stringify(DB)); }catch(e){}
+    } else {
+      // Firestore empty — seed and save
+      loadFromLocal();
+      saveData();
+    }
+    showAppLoader(false);
+    renderRoute();
+  }, (err) => {
+    // Firestore error — fallback to localStorage
+    console.warn('Firebase error:', err);
+    loadFromLocal();
+    showAppLoader(false);
+    renderRoute();
+  });
+}
+
+function defaultActivity(){
+  return [{ id: fid(), icon:"fa-solid fa-circle-info", text:"System initialized — 50 rooms across 5 floors ready.", time: Date.now() - 1000*60*60*3 }];
 }
 
 function getLocalData(){
@@ -101,7 +126,6 @@ function loadFromLocal(){
     DB = local;
   } else {
     DB = seedData();
-    saveData();
   }
 }
 
@@ -127,8 +151,42 @@ function normalizeReservation(r){
   };
 }
 
-// Loading overlay — kept for potential future use
-function showAppLoader(show){}
+// Loading overlay
+function showAppLoader(show){
+  let loader = document.getElementById('app-loader');
+  if(show){
+    if(!loader){
+      loader = document.createElement('div');
+      loader.id = 'app-loader';
+      loader.innerHTML = `
+        <div style="text-align:center;">
+          <div style="font-family:'Fraunces',serif; font-size:28px; color:var(--brass-light); margin-bottom:24px; letter-spacing:-0.01em;">Safwan Royale</div>
+          <div style="width:44px;height:44px;border:3px solid rgba(201,162,75,0.15);border-top-color:var(--brass);border-radius:50%;animation:srSpin .8s linear infinite;margin:0 auto 20px;"></div>
+          <div style="font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--brass);letter-spacing:0.14em;text-transform:uppercase;">Loading system…</div>
+          <div id="loader-sub" style="font-size:12px;color:var(--parchment-dim);margin-top:8px;opacity:0.7;">Syncing with server</div>
+        </div>`;
+      loader.style.cssText = 'position:fixed;inset:0;background:var(--ink);z-index:9999;display:flex;align-items:center;justify-content:center;';
+      document.body.appendChild(loader);
+      if(!document.getElementById('sr-spin-style')){
+        const s = document.createElement('style');
+        s.id = 'sr-spin-style';
+        s.textContent = '@keyframes srSpin{to{transform:rotate(360deg)}}';
+        document.head.appendChild(s);
+      }
+      // Update sub-text after 4 seconds
+      setTimeout(() => {
+        const sub = document.getElementById('loader-sub');
+        if(sub) sub.textContent = 'Almost ready…';
+      }, 4000);
+    }
+  } else {
+    if(loader){
+      loader.style.transition = 'opacity 0.3s ease';
+      loader.style.opacity = '0';
+      setTimeout(() => loader.remove(), 300);
+    }
+  }
+}
 function fid(){ return 'id' + Math.random().toString(36).slice(2,10); }
 function nextRes(){ DB.seq += 1; return 'RES-' + DB.seq; }
 function daysAgo(n){ return Date.now() - n*24*60*60*1000; }
@@ -1727,5 +1785,3 @@ function initShell(){
 }
 loadData();
 document.addEventListener('DOMContentLoaded', initShell);
-
-})();
